@@ -191,8 +191,8 @@ c:\Dev\pilot\
 
 | Setting | Value |
 |---|---|
-| Bot name | `@pilot_webapps_bot` |
-| Token | `8763417220:AAHb5mqM_7aT_u1PcbwcwC6qg7qejqJ9evo` |
+| Bot name | `@xxx` |
+| Token | `xxx` |
 | Webhook | `https://6aee-2001-e68-541a-e875-61ba-aae9-e940-adf9.ngrok-free.app/api/telegram/webhook` |
 
 > ⚠️ ngrok free tier URL changes on restart. When it changes:
