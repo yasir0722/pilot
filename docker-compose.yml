@@ -1,0 +1,119 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: pilot-app
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - REDIS_HOST=redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - pilot
+
+  web:
+    image: nginx:1.25-alpine
+    container_name: pilot-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - pilot
+
+  db:
+    image: mysql:8.0
+    container_name: pilot-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: pilot
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      MYSQL_USER: pilot
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+    ports:
+      - "3307:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - pilot
+
+  redis:
+    image: redis:7-alpine
+    container_name: pilot-redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - redisdata:/data
+    networks:
+      - pilot
+
+  queue:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: pilot-queue
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: php artisan queue:work redis --sleep=3 --tries=3 --max-time=3600
+    depends_on:
+      - app
+      - redis
+    networks:
+      - pilot
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: pilot-scheduler
+    restart: unless-stopped
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: >
+      sh -c "while true; do php artisan schedule:run --verbose --no-interaction; sleep 60; done"
+    depends_on:
+      - app
+    networks:
+      - pilot
+
+  node:
+    image: node:20-alpine
+    container_name: pilot-node
+    working_dir: /var/www
+    volumes:
+      - .:/var/www
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    networks:
+      - pilot
+
+volumes:
+  dbdata:
+  redisdata:
+
+networks:
+  pilot:
+    driver: bridge
