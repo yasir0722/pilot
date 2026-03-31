@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ReceiptController;
 use App\Http\Controllers\Api\ReminderController;
 use App\Http\Controllers\Api\SummaryController;
 use App\Http\Controllers\Api\TelegramController;
+use App\Http\Controllers\Api\VehicleController;
 use Illuminate\Support\Facades\Route;
 
 // Auth (public)
@@ -53,4 +54,17 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Reminders
     Route::apiResource('reminders', ReminderController::class)->except(['show']);
+
+    // Vehicles
+    Route::apiResource('vehicles', VehicleController::class);
+    Route::get('/vehicles-summary', [VehicleController::class, 'summary']);
+    Route::get('/vehicles/{vehicle}/services', [VehicleController::class, 'services']);
+    Route::post('/vehicles/{vehicle}/services', [VehicleController::class, 'storeService']);
+    Route::put('/vehicle-services/{service}', [VehicleController::class, 'updateService']);
+    Route::delete('/vehicle-services/{service}', [VehicleController::class, 'destroyService']);
+    Route::post('/vehicle-services/{service}/receipt', [VehicleController::class, 'uploadServiceReceipt']);
+    Route::get('/vehicles/{vehicle}/warranty-claims', [VehicleController::class, 'warrantyClaims']);
+    Route::post('/vehicles/{vehicle}/warranty-claims', [VehicleController::class, 'storeWarrantyClaim']);
+    Route::put('/vehicle-warranty-claims/{claim}', [VehicleController::class, 'updateWarrantyClaim']);
+    Route::delete('/vehicle-warranty-claims/{claim}', [VehicleController::class, 'destroyWarrantyClaim']);
 });

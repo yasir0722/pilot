@@ -43,6 +43,9 @@
       <router-link to="/reminders" class="bg-white shadow rounded-lg p-4 text-center text-sm font-medium">
         🔔 Reminders
       </router-link>
+      <router-link to="/vehicles" class="bg-white shadow rounded-lg p-4 text-center text-sm font-medium">
+        🚗 Vehicles
+      </router-link>
     </div>
   </div>
 </template>

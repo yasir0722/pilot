@@ -8,6 +8,7 @@
         <router-link to="/groceries" class="hover:text-gray-300">Groceries</router-link>
         <router-link to="/habits" class="hover:text-gray-300">Habits</router-link>
         <router-link to="/reminders" class="hover:text-gray-300">Reminders</router-link>
+        <router-link to="/vehicles" class="hover:text-gray-300">Vehicles</router-link>
         <span class="text-gray-400 text-xs">{{ user?.name }}</span>
         <button @click="logout" class="text-xs text-gray-300 hover:text-white border border-gray-600 rounded px-2 py-1">
           Logout
@@ -35,6 +36,9 @@
       </router-link>
       <router-link to="/reminders" class="flex flex-col items-center gap-0.5" active-class="text-blue-600">
         <span>🔔</span><span>Reminders</span>
+      </router-link>
+      <router-link to="/vehicles" class="flex flex-col items-center gap-0.5" active-class="text-blue-600">
+        <span>🚗</span><span>Vehicles</span>
       </router-link>
     </nav>
   </div>

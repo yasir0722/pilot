@@ -6,6 +6,8 @@ use App\Models\Expense;
 use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\Habit;
+use App\Models\Vehicle;
+use App\Models\VehicleService;
 
 class TelegramCommandParser
 {
@@ -18,6 +20,7 @@ class TelegramCommandParser
      *   add milk         → Add grocery item "milk" to active list
      *   done meditate    → Mark habit "meditate" as complete
      *   summary          → Return daily summary
+     *   service car rm150 oil change → Log vehicle service
      *   help             → Show available commands
      */
     public function parse(string $text): string
@@ -52,6 +55,11 @@ class TelegramCommandParser
         // Habit: done {habit_name}
         if (preg_match('/^done\s+(.+)$/i', $text, $matches)) {
             return $this->completeHabit(trim($matches[1]));
+        }
+
+        // Vehicle service: service {vehicle} rm{amount} {description}
+        if (preg_match('/^service\s+(\S+)\s+rm(\d+(?:\.\d{1,2})?)\s+(.+)$/i', $text, $matches)) {
+            return $this->addVehicleService(trim($matches[1]), (float) $matches[2], trim($matches[3]));
         }
 
         return "Unknown command. Send *help* to see available commands.";
@@ -123,12 +131,32 @@ class TelegramCommandParser
             . "🛒 Grocery pending: {$groceryPending}";
     }
 
+    private function addVehicleService(string $vehicleName, float $cost, string $description): string
+    {
+        $vehicle = Vehicle::where('name', 'like', "%{$vehicleName}%")->first();
+
+        if (!$vehicle) {
+            return "Vehicle *{$vehicleName}* not found.";
+        }
+
+        $vehicle->services()->create([
+            'description' => $description,
+            'cost' => $cost,
+            'date' => today(),
+        ]);
+
+        $totalSpent = $vehicle->services()->sum('cost');
+
+        return "🚗 Service logged for *{$vehicle->name}*\n{$description} — RM{$cost}\nTotal spent: RM{$totalSpent}";
+    }
+
     private function help(): string
     {
         return "*Pilot Bot Commands*\n\n"
             . "`rm12 lunch` — Add RM12 expense for lunch\n"
             . "`add milk` — Add milk to grocery list\n"
             . "`done meditate` — Mark habit as done\n"
+            . "`service car rm150 oil change` — Log vehicle service\n"
             . "`summary` — Daily summary\n"
             . "`help` — Show this message";
     }
