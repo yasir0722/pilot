@@ -17,12 +17,14 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+import { clearAuth } from './auth';
+
 // On 401, clear credentials and redirect to login
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            import('./auth').then(({ clearAuth }) => clearAuth());
+            clearAuth();
             window.location.href = '/login';
         }
         return Promise.reject(error);
