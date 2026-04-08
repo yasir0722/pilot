@@ -45,22 +45,16 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import api from './api';
+import { isLoggedIn, currentUser, clearAuth } from './auth';
 
 const router = useRouter();
-
-const isLoggedIn = computed(() => !!localStorage.getItem('token'));
-const user = computed(() => {
-  try { return JSON.parse(localStorage.getItem('user')) ?? null; }
-  catch { return null; }
-});
+const user = currentUser;
 
 async function logout() {
   try { await api.post('/logout'); } catch {}
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
+  clearAuth();
   router.push('/login');
 }
 </script>

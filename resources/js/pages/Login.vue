@@ -47,6 +47,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api';
+import { setAuth } from '../auth';
 
 const router = useRouter();
 const form = ref({ email: '', password: '' });
@@ -58,8 +59,7 @@ async function submit() {
   loading.value = true;
   try {
     const res = await api.post('/login', form.value);
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
+    setAuth(res.data.token, res.data.user);
     router.push('/');
   } catch (err) {
     error.value = err.response?.data?.message
